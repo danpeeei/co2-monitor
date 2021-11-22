@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  co2-monitor
+
+  Sample SAM Template for co2-monitor
+
+Parameters:
+  LineAccessToken:
+    Type: String
+    Default: ""
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  PostCo2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: co2/
+      Handler: post.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref Co2Table
+      Environment:
+        Variables:
+          TOKEN: !Ref LineAccessToken
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+
+  GetCo2Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: co2/
+      Handler: get.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Co2Table
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+
+  Co2Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: CO2Values
+      AttributeDefinitions:
+        - AttributeName: sensorId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+        - AttributeName: co2
+          AttributeType: N
+        - AttributeName: ttl
+          AttributeType: N
+      KeySchema:
+        - AttributeName: sensorId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  Co2Api:
+    Description: 'API Gateway endpoint URL for Prod stage for CO2 get/post function'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'
