@@ -9,6 +9,9 @@ Parameters:
   LineAccessToken:
     Type: String
     Default: ""
+  CustomMessage:
+    Type: String
+    Default: ""
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -28,6 +31,7 @@ Resources:
       Environment:
         Variables:
           TOKEN: !Ref LineAccessToken
+          CUSTOM_MESSAGE: !Ref CustomMessage
       Events:
         HelloWorld:
           Type: Api
