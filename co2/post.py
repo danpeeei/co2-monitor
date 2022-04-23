@@ -11,6 +11,7 @@ ID = "mySensor"
 TTL = 60 * 60 * 24  # 24 hour
 TOKEN = os.environ["TOKEN"]
 URL = "https://notify-api.line.me/api/notify"
+GRAPH = "http://192.168.10.23/co2-graph"
 
 
 def send_line_notify(message: str):
@@ -33,7 +34,7 @@ def lambda_handler(event, context):
         )
         print(_)
         if co2 >= 1000:
-            send_line_notify(f"換気しませんか？CO2濃度は {co2}ppmです")
+            send_line_notify(f"換気しませんか？CO2濃度は {co2}ppmです\n{GRAPH}")
     except KeyError:
         code = 400
         message = "co2 is not specified"
